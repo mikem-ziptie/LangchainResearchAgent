@@ -17,7 +17,8 @@ import requests
 import json
 from langchain.schema import SystemMessage
 from fastapi import FastAPI
-#import streamlit as st
+import streamlit as st
+from serpapi import GoogleSearch
 
 load_dotenv()
 brwoserless_api_key = os.getenv("BROWSERLESS_API_KEY")
@@ -26,23 +27,21 @@ serper_api_key = os.getenv("SERP_API_KEY")
 # 1. Tool for search
 
 
-def search(query):
-    url = "https://google.serper.dev/search"
+def search(query): 
 
-    payload = json.dumps({
-        "q": query
-    })
+    params = {
+        "q": query,
+        "hl": "en",
+        "gl": "us",
+        "google_domain": "google.com",
+        "api_key": serper_api_key
+        }
 
-    headers = {
-        'X-API-KEY': serper_api_key,
-        'Content-Type': 'application/json'
-    }
+    search = GoogleSearch(params)
+    results = search.get_results()
 
-    response = requests.request("POST", url, headers=headers, data=payload)
-
-    print(response.text)
-
-    return response.text
+    print("Response: " + str(results))
+    return results
 
 
 # 2. Tool for scraping
@@ -176,7 +175,7 @@ agent = initialize_agent(
     memory=memory,
 )
 
-'''
+
 # 4. Use streamlit to create a web app
 def main():
     st.set_page_config(page_title="AI research agent", page_icon=":bird:")
@@ -194,7 +193,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''
+
 
 # 5. Set this as an API endpoint via FastAPI
 app = FastAPI()
